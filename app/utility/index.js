@@ -1,3 +1,3 @@
 module.exports = {
-  user : require('./error_helper.js')
+  utils : require('./error_helper.js')
 };
