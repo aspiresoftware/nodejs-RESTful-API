@@ -14,4 +14,6 @@ module.exports = function (app) {
   });*/
   app.get('/users', controllers.user.list);
   app.post('/user', controllers.user.create);
+  app.put('/user/:id', controllers.user.update);
+  app.delete('/user/:id', controllers.user.remove);
 };

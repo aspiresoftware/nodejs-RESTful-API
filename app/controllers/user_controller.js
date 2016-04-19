@@ -27,7 +27,26 @@ module.exports = {
       return res.status(200).send(user.serialize());
     });
   },
-  get: function (req, res, next) {
-
+  update: function (req, res, next) {
+    var id = parseInt(req.params.id);
+    var params = req.body;
+    req.models.user.get(id, function (err, user) {
+      user.save(params, function (err) {
+        console.log("saved!");
+        return res.status(200).send(user.serialize());
+      });
+    });
+  },
+  remove: function(req, res, next) {
+    var id = parseInt(req.params.id);
+    var params = {
+      isActivate: false
+    };
+    req.models.user.get(id, function (err, user) {
+      user.save(params, function (err) {
+        console.log("removed!");
+        return res.status(200).send(user.serialize());
+      });
+    });
   }
 };
