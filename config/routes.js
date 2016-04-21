@@ -1,19 +1,52 @@
 
 var controllers = require('../app/controllers');
+var express = require('express');
+var jwt = require('jsonwebtoken');
 
 module.exports = function (app) {
-  /*app.get( '/'           , controllers.home);
-  app.get( '/user'       , controllers.user.list);
-  app.post( '/user'      , controllers.user.create);
-  app.get( '/user/:id'   , controllers.user.get);
-  app.put( '/user/:id'   , controllers.user.edit);
-  app.delete( '/user/:id', controllers.user.delete);*/
-  /*app.get('/users', function(req, res, next) {
-    var result = controllers.user.list(req, res, next);
-    res.status('users').json(result);
-  });*/
-  app.get('/users', controllers.user.list);
-  app.post('/user', controllers.user.create);
-  app.put('/user/:id', controllers.user.update);
-  app.delete('/user/:id', controllers.user.remove);
+
+  // API ROUTES -------------------
+
+  // get an instance of the router for api routes
+  var apiRoutes = express.Router();
+
+  apiRoutes.post('/authenticate', controllers.authentication.authenticate);
+
+  // route middleware to verify a token
+  apiRoutes.use(function(req, res, next) {
+
+    // check header or url parameters or post parameters for token
+    var token = req.body.token || req.query.token || req.headers['x-access-token'];
+
+    // decode token
+    if (token) {
+
+      // verifies secret and checks exp
+      jwt.verify(token, 'superSecret', function(err, decoded) {
+        if (err) {
+          return res.json({ success: false, message: 'Failed to authenticate token.' });    
+        } else {
+          // if everything is good, save to request for use in other routes
+          req.decoded = decoded;
+          next();
+        }
+      });
+
+    } else {
+
+      // if there is no token
+      // return an error
+      return res.status(403).send({
+          success: false,
+          message: 'No token provided.'
+      });
+    }
+  });
+
+  apiRoutes.get('/users', controllers.user.list);
+  apiRoutes.post('/user', controllers.user.create);
+  apiRoutes.put('/user/:id', controllers.user.update);
+  apiRoutes.delete('/user/:id', controllers.user.remove);
+
+  app.use('/api', apiRoutes);
 };
