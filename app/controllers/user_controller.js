@@ -14,7 +14,8 @@ module.exports = {
     });
   },
   create: function (req, res, next) {
-    var params = req.body;
+    var loginParams = _.pick(req.body, 'username', 'password');
+    var params = _.pick(req.body, 'firstName', 'lastName');
 
     req.models.user.create(params, function (err, user) {
       if(err) {
@@ -24,7 +25,18 @@ module.exports = {
           return next(err);
         }
       }
-      return res.status(200).send(user.serialize());
+      loginParams.user_id = user.id;
+      /*return res.status(200).send(user.serialize());*/
+      req.models.login.create(loginParams, function (err, user) {
+        if(err) {
+          if(Array.isArray(err)) {
+            return res.status(200).send({ errors: helpers.utils.formatErrors(err) });
+          } else {
+            return next(err);
+          }
+        }
+        return res.status(200).send(user.serialize());
+      });
     });
   },
   update: function (req, res, next) {

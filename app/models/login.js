@@ -1,10 +1,11 @@
 var moment = require('moment');
 
 module.exports = function (orm, db) {
-  var User = db.define('user', {
-    firstName    : { type: 'text', required: true },
-    lastName     : { type: 'text', required: true },
-    isActivate   : { type: 'boolean'},
+  var Login = db.define('login', {
+    username     : { type: 'text', required: true },
+    password     : { type: 'text', required: true },
+    accessToken  : {type: 'text'},
+    refreshToken : {type: 'text'},
     createdAt    : { type: 'date', time: true },
     updatedAt    : { type: 'date', time: true }
   },
@@ -13,7 +14,6 @@ module.exports = function (orm, db) {
       beforeCreate: function() {
         this.createdAt = new Date();
         this.updatedAt = new Date();
-        this.isActivate = true;
       },
       beforeSave: function() {
         this.updatedAt = new Date();
@@ -23,13 +23,15 @@ module.exports = function (orm, db) {
       serialize: function () {
         return {
           id           : this.id,
-          firstName    : this.firstName,
-          lastName     : this.lastName,
-          isActivate   : this.isActivate,
+          username     : this.username,
+          password     : this.password,
+          accessToken  : this.accessToken,
+          refreshToken : this.refreshToken,
           createdAt    : moment(this.createdAt).fromNow(),
           updatedAt    : moment(this.updatedAt).fromNow(),
         };
       }
     }
   });
+  Login.hasOne('user', db.models.user, { required: true, autoFetch: true });
 };

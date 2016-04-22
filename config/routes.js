@@ -10,6 +10,7 @@ module.exports = function (app) {
   // get an instance of the router for api routes
   var apiRoutes = express.Router();
 
+  apiRoutes.post('/user', controllers.user.create);
   apiRoutes.post('/authenticate', controllers.authentication.authenticate);
 
   // route middleware to verify a token
@@ -44,7 +45,6 @@ module.exports = function (app) {
   });
 
   apiRoutes.get('/users', controllers.user.list);
-  apiRoutes.post('/user', controllers.user.create);
   apiRoutes.put('/user/:id', controllers.user.update);
   apiRoutes.delete('/user/:id', controllers.user.remove);
 

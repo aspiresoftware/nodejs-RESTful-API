@@ -8,7 +8,7 @@ module.exports = {
   authenticate: function (req, res, next) {
     var params = req.body;
     if (!params.grant_type) {
-      req.models.user.find({ username: params.username }).each(function (user) {
+      req.models.login.find({ username: params.username }).each(function (user) {
         if (user.password === req.body.password) {
           // if user is found and password is right
           // create a token
@@ -18,7 +18,7 @@ module.exports = {
           user.accessToken = accessToken;
           var refreshToken = crypto.randomBytes(40).toString('hex');
           user.refreshToken = refreshToken;
-          req.models.user.get(user.id, function (err, currUser) {
+          req.models.login.get(user.id, function (err, currUser) {
             currUser.save(user, function (err) {
               console.log("saved!");
               return res.status(200).send(user.serialize());
@@ -27,14 +27,14 @@ module.exports = {
         }
       });
     } else {
-      req.models.user.find({ refreshToken: params.refreshToken }).each(function(user) {
+      req.models.login.find({ refreshToken: params.refreshToken }).each(function(user) {
         var accessToken = jwt.sign(user, 'superSecret', {
           expiresIn: 300
         });
         user.accessToken = accessToken;
         var refreshToken = crypto.randomBytes(40).toString('hex');
         user.refreshToken = refreshToken;
-        req.models.user.get(user.id, function (err, currUser) {
+        req.models.login.get(user.id, function (err, currUser) {
           currUser.save(user, function (err) {
             console.log("saved!");
             return res.status(200).send(user.serialize());
