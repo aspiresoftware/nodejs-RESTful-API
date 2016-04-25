@@ -16,7 +16,7 @@ module.exports = function (app) {
   apiRoutes.post('/authenticate', controllers.authentication.authenticate);
 
   // route middleware to verify a token
-  apiRoutes.use(function(req, res, next) {
+  /*apiRoutes.use(function(req, res, next) {
 
     // check header or url parameters or post parameters for token
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
@@ -44,7 +44,7 @@ module.exports = function (app) {
           message: 'No token provided.'
       });
     }
-  });
+  });*/
 
   apiRoutes.get('/users', controllers.user.list);
   apiRoutes.put('/user/:id', controllers.user.update);

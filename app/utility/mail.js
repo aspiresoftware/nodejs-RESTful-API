@@ -1,5 +1,6 @@
 var nodemailer = require("nodemailer");
 var sendmailTransport = require('nodemailer-sendmail-transport');
+
 /*
   Here we are configuring our SMTP Server details.
   STMP is mail server which is responsible for sending and recieving email.
@@ -12,7 +13,7 @@ module.exports = {
     var mailOptions = {
       to : req.body.to,
       subject : req.body.subject,
-      text : req.body.text
+      html : '<a href="http://expressjs.com/en/guide/using-middleware.html">Forgot Password</a>'
     };
     console.log(mailOptions);
     smtpTransport.sendMail(mailOptions, function(error, response) {
