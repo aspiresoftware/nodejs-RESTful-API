@@ -2,6 +2,7 @@
 var controllers = require('../app/controllers');
 var express = require('express');
 var jwt = require('jsonwebtoken');
+var utility = require('../app/utility/');
 
 module.exports = function (app) {
 
@@ -10,6 +11,7 @@ module.exports = function (app) {
   // get an instance of the router for api routes
   var apiRoutes = express.Router();
 
+  apiRoutes.post('/forgot/password', utility.mail.sendMail);
   apiRoutes.post('/user', controllers.user.create);
   apiRoutes.post('/authenticate', controllers.authentication.authenticate);
 
@@ -25,7 +27,7 @@ module.exports = function (app) {
       // verifies secret and checks exp
       jwt.verify(token, 'superSecret', function(err, decoded) {
         if (err) {
-          return res.json({ success: false, message: 'Failed to authenticate token.' });    
+          return res.json({ success: false, message: 'Failed to authenticate token.' });
         } else {
           // if everything is good, save to request for use in other routes
           req.decoded = decoded;
