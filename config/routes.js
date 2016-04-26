@@ -17,7 +17,8 @@ module.exports = function (app) {
 
   // Define public routes
   // This routes does not require token
-  apiRoutes.post('/forgot/password', utility.mail.sendMail);
+  apiRoutes.post('/forgot', utility.mail.sendMail);
+  apiRoutes.post('/forgot/password', controllers.authentication.forgotPassword);
   apiRoutes.post('/user', controllers.user.create);
   apiRoutes.post('/authenticate', controllers.authentication.authenticate);
 

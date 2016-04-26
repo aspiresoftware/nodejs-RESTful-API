@@ -54,7 +54,7 @@ module.exports = {
     var params = req.body;
     req.models.user.get(id, function (err, user) {
       user.save(params, function (err) {
-        console.log("saved!");
+        console.log("saved!" + user);
         return res.status(200).send(user.serialize());
       });
     });

@@ -12,6 +12,7 @@ var helpers = require('../utility');
 module.exports = {
   // Authenticate user
   authenticate: function (req, res, next) {
+    var athorizationToken = req.headers.athorization;
     // get values from request body
     var params = req.body;
     // Check whether params have key grant_type or not
@@ -57,5 +58,18 @@ module.exports = {
         });
       });
     }
+  },
+  // change password
+  forgotPassword: function(req, res, next) {
+    var params = req.body;
+    req.models.login.find({username: params.username}).each(function(user) {
+      user.password = params.password;
+      req.models.login.get(user.id, function(err, currUser) {
+        currUser.save(user, function(err) {
+          console.log("password changed");
+          return res.status(200).send(user.serialize());
+        });
+      });
+    });
   }
 };
