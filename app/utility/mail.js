@@ -16,7 +16,7 @@ module.exports = {
     var mailOptions = {
       to : req.body.to,
       subject : req.body.subject,
-      html : '<a href="http://expressjs.com/en/guide/using-middleware.html">Forgot Password</a>'
+      html : '<a href="' + req.body.url + '">Forgot Password</a>'
     };
     console.log(mailOptions);
     smtpTransport.sendMail(mailOptions, function(error, response) {
