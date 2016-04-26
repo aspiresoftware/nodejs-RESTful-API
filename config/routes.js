@@ -12,6 +12,12 @@ module.exports = function (app) {
 
   // API ROUTES -------------------
 
+  app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Authorization, Content-Type, Accept");
+    next();
+  });
+
   // get an instance of the router for api routes
   var apiRoutes = express.Router();
 
@@ -25,26 +31,32 @@ module.exports = function (app) {
   // route middleware to verify a token
   apiRoutes.use(function(req, res, next) {
     // check header or url parameters or post parameters for token
-    var token = req.body.token || req.query.token || req.headers['x-access-token'];
-    // decode token
-    if (token) {
-      // verifies secret and checks exp
-      jwt.verify(token, 'superSecret', function(err, decoded) {
-        if (err) {
-          return res.json({ success: false, message: 'Failed to authenticate token.' });
-        } else {
-          // if everything is good, save to request for use in other routes
-          req.decoded = decoded;
-          next();
-        }
-      });
-    } else {
-      // if there is no token
-      // return an error
-      return res.status(403).send({
-          success: false,
-          message: 'No token provided.'
-      });
+    var header = req.headers.authorization;
+    var prefix = header.split(' ')[0];
+    var token = header.split(' ')[1];
+
+    // check for autheticated user
+    if (prefix == 'Bearer') {
+      // decode token
+      if (token) {
+        // verifies secret and checks exp
+        jwt.verify(token, 'superSecret', function(err, decoded) {
+          if (err) {
+            return res.json({ status: 419, message: 'Failed to authenticate token.' });
+          } else {
+            // if everything is good, save to request for use in other routes
+            req.decoded = decoded;
+            next();
+          }
+        });
+      } else {
+        // if there is no token
+        // return an error
+        return res.status(403).send({
+            success: false,
+            message: 'No token provided.'
+        });
+      }
     }
   });
 

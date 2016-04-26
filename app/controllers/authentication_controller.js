@@ -12,36 +12,49 @@ var helpers = require('../utility');
 module.exports = {
   // Authenticate user
   authenticate: function (req, res, next) {
-    var athorizationToken = req.headers.athorization;
-    // get values from request body
     var params = req.body;
+
+    var athorizationToken = req.headers.authorization.split(" ")[1];
+
     // Check whether params have key grant_type or not
     if (!params.grant_type) {
       // if yes, then it will verify username and password
       // and then give access and refresh token
-      req.models.login.find({ username: params.username }).each(function (user) {
-        if (user.password === req.body.password) {
-          // if user is found and password is right
-          // create an access token
-          var accessToken = jwt.sign(user, 'superSecret', {
-            expiresIn: 300
-          });
-          user.accessToken = accessToken;
-          // generate refresh token
-          var refreshToken = crypto.randomBytes(40).toString('hex');
-          user.refreshToken = refreshToken;
-          req.models.login.get(user.id, function (err, currUser) {
-            currUser.save(user, function (err) {
-              console.log("saved!");
-              return res.status(200).send(user.serialize());
+
+      /*params.username = new Buffer(params.username, 'base64').toString();
+      params.password = new Buffer(params.password, 'base64').toString();*/
+
+      // get values from request header
+      var buf = new Buffer(athorizationToken, 'base64');
+      var loginCredentials = {};
+      loginCredentials.username = buf.toString().split(':')[0];
+      loginCredentials.password = buf.toString().split(':')[1];
+
+      /*if (params.username == loginCredentials.username && params.password == loginCredentials.password) {*/
+        req.models.login.find({ username: loginCredentials.username }).each(function (user) {
+          if (user.password === loginCredentials.password) {
+            // if user is found and password is right
+            // create an access token
+            var accessToken = jwt.sign(user, 'superSecret', {
+              expiresIn: 300
             });
-          });
-        }
-      });
+            user.accessToken = accessToken;
+            // generate refresh token
+            var refreshToken = crypto.randomBytes(40).toString('hex');
+            user.refreshToken = refreshToken;
+            req.models.login.get(user.id, function (err, currUser) {
+              currUser.save(user, function (err) {
+                console.log("saved!");
+                return res.status(200).send(user.serialize());
+              });
+            });
+          }
+        });
+      /*}*/
     } else {
       // if no, then it will verify refresh token
       // adn then generate new access token
-      req.models.login.find({ refreshToken: params.refreshToken }).each(function(user) {
+      req.models.login.find({ refreshToken: athorizationToken }).each(function(user) {
         // generate new access token
         var accessToken = jwt.sign(user, 'superSecret', {
           expiresIn: 300
