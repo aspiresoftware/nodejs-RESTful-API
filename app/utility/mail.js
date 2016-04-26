@@ -1,3 +1,6 @@
+/**
+ * Utitlity for sending mail
+ */
 var nodemailer = require("nodemailer");
 var sendmailTransport = require('nodemailer-sendmail-transport');
 

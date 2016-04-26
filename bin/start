@@ -1,3 +1,6 @@
+# Start the server with nodemon
+# Nodemon is a utility that will monitor for any changes in your source and automatically restart your server
+
 #!/usr/bin/env bash
 
 items="app config ../../node_modules/sql-query ../../lib server.js"

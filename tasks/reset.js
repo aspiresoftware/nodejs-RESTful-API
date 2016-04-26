@@ -1,3 +1,7 @@
+/**
+ * This file automatically creates tables in DB
+ * It will take models from model folder and created tables based on models
+ */
 var models = require('../app/models/');
 
 models(function (err, db) {

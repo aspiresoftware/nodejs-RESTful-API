@@ -1,3 +1,6 @@
+/**
+ * Login model
+ */
 var moment = require('moment');
 
 module.exports = function (orm, db) {

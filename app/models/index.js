@@ -1,3 +1,6 @@
+/**
+ * Register models here
+ */
 var orm      = require('orm');
 var settings = require('../../config/settings');
 

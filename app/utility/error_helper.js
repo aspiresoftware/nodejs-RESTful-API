@@ -1,3 +1,6 @@
+/**
+ * Utility for formatting error
+ */
 module.exports = {
   formatErrors: function(errorsIn) {
     var errors = {};
