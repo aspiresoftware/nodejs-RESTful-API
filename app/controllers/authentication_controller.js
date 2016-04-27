@@ -38,11 +38,11 @@ module.exports = {
             var accessToken = jwt.sign(user, 'superSecret', {
               expiresIn: 300
             });
-            user.accessToken = accessToken;
             // generate refresh token
             var refreshToken = crypto.randomBytes(40).toString('hex');
-            user.refreshToken = refreshToken;
             req.models.login.get(user.id, function (err, currUser) {
+              currUser.accessToken = accessToken;
+              currUser.refreshToken = refreshToken;
               currUser.save(user, function (err) {
                 console.log("saved!");
                 return res.status(200).send(user.serialize());

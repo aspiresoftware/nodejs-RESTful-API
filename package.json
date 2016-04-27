@@ -26,7 +26,8 @@
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "sendmail": "^0.2.1",
-    "sql-query": "^0.1.26"
+    "sql-query": "^0.1.26",
+    "winston": "^2.2.0"
   },
   "devDependencies": {
     "orm": "^2.1.30"
