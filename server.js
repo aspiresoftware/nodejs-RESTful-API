@@ -11,6 +11,8 @@ var settings    = require('./config/settings');
 var environment = require('./config/environment');
 var routes      = require('./config/routes');
 var models      = require('./app/models/');
+var swagger     = require('swagger-express');
+var api = require('./api/api');
 
 module.exports.start = function (done) {
   // cerate express app
@@ -18,8 +20,26 @@ module.exports.start = function (done) {
 
   // Set environment
   environment(app);
+
+  app.use(swagger.init(app, {
+    apiVersion: '1.0',
+    swaggerVersion: '1.0',
+    swaggerURL: '/swagger',
+    swaggerJSON: '/api-docs.json',
+    swaggerUI: './public/swagger/',
+    basePath: 'http://localhost:3000',
+    info: {
+      title: 'swagger-express sample app',
+      description: 'Swagger + Express = {swagger-express}'
+    },
+    apis: ['./api/api.js'],
+    middleware: function(req, res){}
+  }));
+
   // Set routing
   routes(app);
+
+  app.post('/login', api.login);
 
   // Listen to port
   app.listen(settings.port, function () {

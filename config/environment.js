@@ -21,6 +21,11 @@ module.exports = function (app) {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
 
+  app.all('/*', function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+  });
+
   // Set up DB and models
   app.use(function (req, res, next) {
     models(function (err, db) {
