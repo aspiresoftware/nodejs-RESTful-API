@@ -92,11 +92,13 @@ module.exports = {
             }
           }
           if(Array.isArray(userList)) {
-            console.log(userList);
             var user = userList[0];
             // generate new access token
             var random = crypto.randomBytes(10).toString('hex');
-            var accessToken = jwt.sign(user.id + random, 'superSecret', {
+            var userRandom = {};
+            userRandom.id = userList[0].id;
+            userRandom.random = random;
+            var accessToken = jwt.sign(userRandom, 'superSecret', {
               expiresIn: 5
             });
             user.accessToken = accessToken;
