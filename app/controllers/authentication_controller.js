@@ -52,7 +52,7 @@ module.exports = {
                 userRandom.id = userList[0].id;
                 userRandom.random = random;
                 var accessToken = jwt.sign(userRandom, 'superSecret', {
-                  expiresIn: 5
+                  expiresIn: 40
                 });
                 // generate refresh token
                 var refreshToken = crypto.randomBytes(40).toString('hex');
@@ -99,7 +99,7 @@ module.exports = {
             userRandom.id = userList[0].id;
             userRandom.random = random;
             var accessToken = jwt.sign(userRandom, 'superSecret', {
-              expiresIn: 5
+              expiresIn: 60
             });
             user.accessToken = accessToken;
             var refreshToken = crypto.randomBytes(40).toString('hex');
@@ -131,6 +131,16 @@ module.exports = {
           return res.status(200).send(user.serialize());
         });
       });
+    });
+  },
+  // logout
+  logout: function(req, res, next) {
+    var athorizationToken = req.headers.authorization.split(" ")[1];
+    req.models.authToken.find({ accessToken: athorizationToken }).remove(function(err){
+      if(err) {
+        return res.status(500).send({error: 'Error while logging out'});
+      }
+      return res.status(200).send({ message: 'Successfully logged out'});
     });
   }
 };

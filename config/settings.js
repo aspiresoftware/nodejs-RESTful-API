@@ -5,7 +5,7 @@ var settings = {
   port       : process.env.NODE_PORT || 3002,
   database   : {
     protocol : "mysql", // or "postgresql"
-    query    : { pool: true },
+    query    : { pool: true, debug: true },
     host     : "127.0.0.1",
     database : "helpMe",
     user     : "root",
