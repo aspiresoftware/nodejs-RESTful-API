@@ -14,7 +14,7 @@
  *      notes: Returns a user based on username
  *      responseClass: User
  *      nickname: authenticate
- *      consumes: 
+ *      consumes:
  *        - text/html
  *      parameters:
  *        - name: username

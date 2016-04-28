@@ -35,13 +35,14 @@ module.exports = function (app) {
     var token = header.split(' ')[1];
 
     // check for autheticated user
+    // route middleware to verify a token
     if (prefix == 'Bearer') {
       // decode token
       if (token) {
         // verifies secret and checks exp
         jwt.verify(token, 'superSecret', function(err, decoded) {
           if (err) {
-            return res.status(419).send({message: 'Failed to authenticate token.'});
+            return res.status(419).send({status:419, message: 'Failed to authenticate token.'});
           } else {
             // if everything is good, save to request for use in other routes
             req.decoded = decoded;
@@ -58,7 +59,6 @@ module.exports = function (app) {
       }
     }
   }
-  // route middleware to verify a token
   /*apiRoutes.use(function(req, res, next) {
     // check header or url parameters or post parameters for token
     var header = req.headers.authorization;

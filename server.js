@@ -27,7 +27,7 @@ module.exports.start = function (done) {
     swaggerURL: '/swagger',
     swaggerJSON: '/api-docs.json',
     swaggerUI: './public/swagger/',
-    basePath: 'http://localhost:3000',
+    basePath: 'http://localhost:3002',
     info: {
       title: 'swagger-express sample app',
       description: 'Swagger + Express = {swagger-express}'

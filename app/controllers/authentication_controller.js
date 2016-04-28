@@ -13,36 +13,97 @@ module.exports = {
   // Authenticate user
   authenticate: function (req, res, next) {
     var params = req.body;
+    if (req.headers.authorization) {
+      var athorizationToken = req.headers.authorization.split(" ")[1];
+      // Check whether params have key grant_type or not
+      if (params.grantType == 'password') {
+        // if yes, then it will verify username and password
+        // and then give access and refresh token
 
-    var athorizationToken = req.headers.authorization.split(" ")[1];
+        // get values from request header
+        var buf = new Buffer(athorizationToken, 'base64');
+        var loginCredentials = {};
+        loginCredentials.username = buf.toString().split(':')[0];
+        loginCredentials.password = buf.toString().split(':')[1];
+        console.log(loginCredentials.username + ' ' + loginCredentials.password);
+        console.log(params.username + ' ' + params.password);
+        if (loginCredentials.username == params.username && loginCredentials.password == params.password) {
+          req.models.user.find({
+            username: loginCredentials.username,
+            isActivate: true,
+            isDeleted: false
+          }, function(err, userList) {
+            if(err) {
+              if(Array.isArray(err)) {
+                return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+              } else {
+                /*return next(err);*/
+                return res.status(500).send({ errors: err });
+              }
+            }
+            if(Array.isArray(userList)) {
+              console.log(userList);
+              console.log(userList[0].password + ' ' + loginCredentials.password);
+              if (userList[0].password === loginCredentials.password) {
+                // if user is found and password is right
+                // create an access token
+                var random = crypto.randomBytes(10).toString('hex');
+                var userRandom = {};
+                userRandom.id = userList[0].id;
+                userRandom.random = random;
+                var accessToken = jwt.sign(userRandom, 'superSecret', {
+                  expiresIn: 5
+                });
+                // generate refresh token
+                var refreshToken = crypto.randomBytes(40).toString('hex');
+                params.accessToken = accessToken;
+                params.refreshToken = refreshToken;
+                params.user_id = userList[0].id;
+                params.ipAddress = req.connection.remoteAddress;
+                params.userAgent = req.headers['user-agent'];
 
-    // Check whether params have key grant_type or not
-    if (!params.grant_type) {
-      // if yes, then it will verify username and password
-      // and then give access and refresh token
-
-      /*params.username = new Buffer(params.username, 'base64').toString();
-      params.password = new Buffer(params.password, 'base64').toString();*/
-
-      // get values from request header
-      var buf = new Buffer(athorizationToken, 'base64');
-      var loginCredentials = {};
-      loginCredentials.username = buf.toString().split(':')[0];
-      loginCredentials.password = buf.toString().split(':')[1];
-
-      /*if (params.username == loginCredentials.username && params.password == loginCredentials.password) {*/
-        req.models.login.find({ username: loginCredentials.username }).each(function (user) {
-          if (user.password === loginCredentials.password) {
-            // if user is found and password is right
-            // create an access token
-            var accessToken = jwt.sign(user, 'superSecret', {
-              expiresIn: 300
+                req.models.authToken.create(params, function (err, loggedUser) {
+                  if(err) {
+                    if(Array.isArray(err)) {
+                      return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+                    } else {
+                      return next(err);
+                    }
+                  }
+                  return res.status(200).send(loggedUser.serialize());
+                });
+              } else {
+                return res.status(500).send({ error: 'Password is invalid' });
+              }
+            }
+          });
+        } else {
+          return res.status(500).send({ error: 'Wrong crendentials' });
+        }
+      } else if(params.grantType == 'accessToken') {
+        // if no, then it will verify refresh token
+        // adn then generate new access token
+        req.models.authToken.find({refreshToken: athorizationToken}, function(err, userList) {
+          if(err) {
+            if(Array.isArray(err)) {
+              return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+            } else {
+              return next(err);
+            }
+          }
+          if(Array.isArray(userList)) {
+            console.log(userList);
+            var user = userList[0];
+            // generate new access token
+            var random = crypto.randomBytes(10).toString('hex');
+            var accessToken = jwt.sign(user.id + random, 'superSecret', {
+              expiresIn: 5
             });
-            // generate refresh token
+            user.accessToken = accessToken;
             var refreshToken = crypto.randomBytes(40).toString('hex');
-            req.models.login.get(user.id, function (err, currUser) {
-              currUser.accessToken = accessToken;
-              currUser.refreshToken = refreshToken;
+            user.refreshToken = refreshToken;
+            // save newly generated access and refresh token
+            req.models.authToken.get(user.id, function (err, currUser) {
               currUser.save(user, function (err) {
                 console.log("saved!");
                 return res.status(200).send(user.serialize());
@@ -50,26 +111,11 @@ module.exports = {
             });
           }
         });
-      /*}*/
+      } else {
+        return res.status(500).send({ error: 'No grantType is provided' });
+      }
     } else {
-      // if no, then it will verify refresh token
-      // adn then generate new access token
-      req.models.login.find({ refreshToken: athorizationToken }).each(function(user) {
-        // generate new access token
-        var accessToken = jwt.sign(user, 'superSecret', {
-          expiresIn: 300
-        });
-        user.accessToken = accessToken;
-        var refreshToken = crypto.randomBytes(40).toString('hex');
-        user.refreshToken = refreshToken;
-        // save newly generated access and refresh token
-        req.models.login.get(user.id, function (err, currUser) {
-          currUser.save(user, function (err) {
-            console.log("saved!");
-            return res.status(200).send(user.serialize());
-          });
-        });
-      });
+      return res.status(500).send({ error: 'No Authorization header is provided' });
     }
   },
   // change password

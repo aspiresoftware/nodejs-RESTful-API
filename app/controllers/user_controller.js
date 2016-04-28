@@ -10,63 +10,89 @@ var helpers = require('../utility');
 module.exports = {
   // get list of all users
   list: function (req, res, next) {
-    req.models.user.find().limit(4).order('-id').all(function (err, users) {
-      if (err) return next(err);
+    req.models.user.find().all(function (err, users) {
 
+      if(err) {
+        if(Array.isArray(err)) {
+          return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+        } else {
+          return next(err);
+        }
+      }
+
+      // Serialize user into json
       var userList = users.map(function (currentUser) {
         return currentUser.serialize();
       });
       return res.status(200).send({ users: userList});
     });
   },
+
   // Save new user
   create: function (req, res, next) {
-    var loginParams = _.pick(req.body, 'username', 'password');
-    var params = _.pick(req.body, 'firstName', 'lastName');
+    var params = req.body;
 
     // save user
     req.models.user.create(params, function (err, user) {
       if(err) {
         if(Array.isArray(err)) {
-          return res.status(200).send({ errors: helpers.utils.formatErrors(err) });
+          return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
         } else {
           return next(err);
         }
       }
-      // get user_id to save username and password in login
-      loginParams.user_id = user.id;
-      // save login credentials
-      req.models.login.create(loginParams, function (err, user) {
-        if(err) {
-          if(Array.isArray(err)) {
-            return res.status(200).send({ errors: helpers.utils.formatErrors(err) });
-          } else {
-            return next(err);
-          }
-        }
-        return res.status(200).send(user.serialize());
-      });
+      return res.status(200).send(user.serialize());
     });
   },
+
   // update user
   update: function (req, res, next) {
     var id = parseInt(req.params.id);
     var params = req.body;
     req.models.user.get(id, function (err, user) {
+      if(err) {
+        if(Array.isArray(err)) {
+          return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+        } else {
+          return next(err);
+        }
+      }
       user.save(params, function (err) {
+        if(err) {
+          if(Array.isArray(err)) {
+            return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+          } else {
+            return next(err);
+          }
+        }
         console.log("saved!" + user);
         return res.status(200).send(user.serialize());
       });
     });
   },
+
   // delete user
   remove: function(req, res, next) {
     var id = parseInt(req.params.id);
     var params = {
-      isActivate: false
+      isDeleted: true
     };
     req.models.user.get(id, function (err, user) {
+      if(err) {
+        if(Array.isArray(err)) {
+          return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+        } else {
+          return next(err);
+        }
+      }
       user.save(params, function (err) {
+        if(err) {
+          if(Array.isArray(err)) {
+            return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+          } else {
+            return next(err);
+          }
+        }
         console.log("removed!");
         return res.status(200).send(user.serialize());
       });

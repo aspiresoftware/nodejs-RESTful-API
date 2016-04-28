@@ -1,8 +1,8 @@
 resourcePath: /apiYml
 description: All about API
-apis: 
+apis:
 
-- path: /authenticate                                           
+- path: /authenticate
   operations:
 
   - httpMethod: POST
@@ -10,7 +10,7 @@ apis:
     notes: Returns a user based on username
     responseClass: User
     nickname: authenticate
-    consumes: 
+    consumes:
       - text/html
     parameters:
 
