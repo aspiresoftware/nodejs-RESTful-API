@@ -9,11 +9,12 @@ var bodyParser = require('body-parser');
 var logger = require('morgan');
 var settings = require('./settings');
 var models   = require('../app/models/');
+var log = require('./logger.js');
 
-/*var logger = require('./logger');*/
+//var logger = require('./logger');
 
 module.exports = function (app) {
-  //logger.debug("Overriding 'Express' logger");
+  log.debug('Starting express app');
   //app.use(require('morgan')({ "stream": logger.stream }));
   // HTTP request logger middleware for node.js
   app.use(logger('dev'));

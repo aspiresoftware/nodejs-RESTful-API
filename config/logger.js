@@ -1,30 +1,33 @@
-/*var winston = require('winston');
-winston.emitErrs = true;
+var winston = require( 'winston' ),
+  fs = require( 'fs' ),
+  logDir = 'log', // Or read from a configuration
+  env = process.env.NODE_ENV || 'development',
+  logger;
 
-var logger = new winston.Logger({
+winston.setLevels( winston.config.npm.levels );
+winston.addColors( winston.config.npm.colors );
+
+if ( !fs.existsSync( logDir ) ) {
+  // Create the directory if it does not exist
+  fs.mkdirSync( logDir );
+}
+logger = new( winston.Logger )( {
   transports: [
-    new winston.transports.File({
-      level: 'info',
-      filename: '../logs/all-logs.log',
-      handleExceptions: true,
-      json: true,
-      maxsize: 5242880, //5MB
-      maxFiles: 5,
-      colorize: false
-    }),
-    new winston.transports.Console({
-      level: 'debug',
-      handleExceptions: true,
-      json: false,
+    new winston.transports.Console( {
+      level: 'warn', // Only write logs of warn level or higher
       colorize: true
-    })
-  ],
-  exitOnError: false
-});
+    } ),
+    new winston.transports.File( {
+      level: env === 'development' ? 'debug' : 'info',
+      filename: logDir + '/logs.log',
+      maxsize: 1024 * 1024 * 10 // 10MB
+    } )
+    ],
+  exceptionHandlers: [
+    new winston.transports.File( {
+      filename: 'log/exceptions.log'
+    } )
+    ]
+} );
 
 module.exports = logger;
-module.exports.stream = {
-  write: function(message, encoding){
-    logger.info(message);
-  }
-};*/

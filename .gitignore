@@ -4,6 +4,7 @@
 
 # Temporary files
 /node_modules
+/logs
 
 # Build artifacts
 
