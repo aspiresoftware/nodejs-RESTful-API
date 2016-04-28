@@ -2,7 +2,7 @@
  * Utility for error messages and status
  */
 module.exports = {
-  errorMessage: function() {
+  errorStatus: function() {
     return {
       OK: 200,
       Created: 201,
@@ -20,7 +20,7 @@ module.exports = {
       GatewayTimeout: 504
     };
   },
-  errorStatus: function() {
+  errorMessages: function() {
     return {
       OK: 'The request was successful, and results may be obtained in the response body',
       Created: 'The POST request was successful, and results may be obtained in the response body.',
