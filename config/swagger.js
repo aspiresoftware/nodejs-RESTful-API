@@ -15,7 +15,6 @@ module.exports = function(app) {
       description: 'Swagger + Express = {swagger-express}'
     },
     apis: ['./api/api.js'],
-    middleware: function(req, res){
-    }
+    middleware: function(req, res){}
   }));
 };

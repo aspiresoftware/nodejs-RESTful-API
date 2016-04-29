@@ -2,7 +2,6 @@
  * Register models here
  */
 var orm      = require('orm');
-var transaction = require("orm-transaction");
 var settings = require('../../config/settings');
 
 var connection = null;
@@ -22,6 +21,5 @@ module.exports = function (cb) {
 
     db.settings.set('instance.returnAllErrors', true);
     setup(db, cb);
-    db.use(transaction);
   });
 };

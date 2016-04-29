@@ -5,8 +5,6 @@
 // Inject node module dependencies
 var _       = require('lodash');
 var orm     = require('orm');
-var jwt = require('jsonwebtoken');
-var crypto = require('crypto');
 var helpers = require('../utility');
 var log = require('../../config/logger.js');
 

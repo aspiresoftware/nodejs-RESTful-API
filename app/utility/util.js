@@ -1,3 +1,6 @@
+var jwt = require('jsonwebtoken');
+var crypto = require('crypto');
+
 module.exports = {
   createAuthToken : function (user) {
     var random = crypto.randomBytes(10).toString('hex');

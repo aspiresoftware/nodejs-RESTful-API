@@ -2,8 +2,7 @@
  * Utility for error messages and status
  */
 module.exports = {
-  errorStatus: function() {
-    return {
+  errorStatus: {
       OK: 200,
       Created: 201,
       NoContent: 204,
@@ -18,10 +17,8 @@ module.exports = {
       NotImplemented: 501,
       ServiceUnavailable: 503,
       GatewayTimeout: 504
-    };
   },
-  errorMessages: function() {
-    return {
+  errorMessages: {
       OK: 'The request was successful, and results may be obtained in the response body',
       Created: 'The POST request was successful, and results may be obtained in the response body.',
       NoContent: 'The request was successful, but the response body is empty as nothing deemed important should be returned.',
@@ -41,7 +38,6 @@ module.exports = {
       invalidToken: "Check your token details. Not matched with any user !",
       grantTypeNotFound: 'Not found valid grantType !',
       authorizationNotFound: 'No Authorization header is provided'
-    };
   },
   formatErrors: function(errorsIn) {
     var errors = {};
