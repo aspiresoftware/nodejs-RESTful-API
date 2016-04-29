@@ -35,7 +35,24 @@ module.exports = {
       InternalServerError: 'Some unhandled server error has been occurred',
       NotImplemented: 'This API endpoint is not yet implemented; please contact service developers for more information.',
       ServiceUnavailable: 'The service is temporarily unavailable. Please try again later.',
-      GatewayTimeout: 'The request was unable to be processed in time. This may be due to server load. Please try again later.'
+      GatewayTimeout: 'The request was unable to be processed in time. This may be due to server load. Please try again later.',
+      usernameNotFound: "Please check your username !",
+      invalidPassword: "Password is invalid",
+      invalidToken: "Check your token details. Not matched with any user !",
+      grantTypeNotFound: 'Not found valid grantType !',
+      authorizationNotFound: 'No Authorization header is provided'
     };
+  },
+  formatErrors: function(errorsIn) {
+    var errors = {};
+    var a, e;
+
+    for(a = 0; a < errorsIn.length; a++) {
+      e = errorsIn[a];
+
+      errors[e.property] = errors[e.property] || [];
+      errors[e.property].push(e.msg);
+    }
+    return errors;
   }
 };

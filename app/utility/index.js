@@ -1,4 +1,5 @@
 module.exports = {
-  utils : require('./error_helper.js'),
+  error : require('./error.js'),
   mail : require('./mail.js'),
+  util : require('./util.js')
 };

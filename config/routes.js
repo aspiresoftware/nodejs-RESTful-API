@@ -68,5 +68,5 @@ module.exports = function (app) {
   apiRoutes.delete('/logout', autheticationMiddleware, controllers.authentication.logout);
 
   // Add prefix to routes
-  app.use('/api', apiRoutes);
+  app.use('/api/v1', apiRoutes);
 };

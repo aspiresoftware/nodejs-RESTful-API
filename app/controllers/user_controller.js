@@ -6,6 +6,7 @@
 var _       = require('lodash');
 var orm     = require('orm');
 var helpers = require('../utility');
+var log = require('../../config/logger.js');
 
 module.exports = {
   // get list of all users
@@ -14,7 +15,7 @@ module.exports = {
 
       if(err) {
         if(Array.isArray(err)) {
-          return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+          return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
         } else {
           return next(err);
         }
@@ -24,7 +25,7 @@ module.exports = {
       var userList = users.map(function (currentUser) {
         return currentUser.serialize();
       });
-      return res.status(200).send({ users: userList});
+      return res.status(helpers.error.errorStatus.OK).send({ users: userList});
     });
   },
 
@@ -36,12 +37,12 @@ module.exports = {
     req.models.user.create(params, function (err, user) {
       if(err) {
         if(Array.isArray(err)) {
-          return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+          return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
         } else {
           return next(err);
         }
       }
-      return res.status(200).send(user.serialize());
+      return res.status(helpers.error.errorStatus.OK).send(user.serialize());
     });
   },
 
@@ -52,7 +53,7 @@ module.exports = {
     req.models.user.get(id, function (err, user) {
       if(err) {
         if(Array.isArray(err)) {
-          return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+          return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
         } else {
           return next(err);
         }
@@ -60,13 +61,13 @@ module.exports = {
       user.save(params, function (err) {
         if(err) {
           if(Array.isArray(err)) {
-            return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+            return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
           } else {
             return next(err);
           }
         }
         console.log("saved!" + user);
-        return res.status(200).send(user.serialize());
+        return res.status(helpers.error.errorStatus.OK).send(user.serialize());
       });
     });
   },
@@ -80,7 +81,7 @@ module.exports = {
     req.models.user.get(id, function (err, user) {
       if(err) {
         if(Array.isArray(err)) {
-          return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+          return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
         } else {
           return next(err);
         }
@@ -88,13 +89,13 @@ module.exports = {
       user.save(params, function (err) {
         if(err) {
           if(Array.isArray(err)) {
-            return res.status(500).send({ errors: helpers.utils.formatErrors(err) });
+            return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
           } else {
             return next(err);
           }
         }
         console.log("removed!");
-        return res.status(200).send(user.serialize());
+        return res.status(helpers.error.errorStatus.OK).send(user.serialize());
       });
     });
   }
