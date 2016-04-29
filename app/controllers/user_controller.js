@@ -11,21 +11,25 @@ var log = require('../../config/logger.js');
 module.exports = {
   // get list of all users
   list: function (req, res, next) {
-    req.models.user.find().all(function (err, users) {
+    helpers.util.setPageSize(req.models.user);
+    req.models.user.pages(function (err, totalPages) {
+      var pagination = helpers.util.pagination(req, totalPages);
+      req.models.user.page(pagination.currentPage).run(function (err, users) {
 
-      if(err) {
-        if(Array.isArray(err)) {
-          return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
-        } else {
-          return next(err);
+        if(err) {
+          if(Array.isArray(err)) {
+            return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
+          } else {
+            return next(err);
+          }
         }
-      }
 
-      // Serialize user into json
-      var userList = users.map(function (currentUser) {
-        return currentUser.serialize();
+        // Serialize user into json
+        var userList = users.map(function (currentUser) {
+          return currentUser.serialize();
+        });                                         
+        return res.status(helpers.error.errorStatus.OK).send({ pages: totalPages, currentPage: pagination.currentPage, hasPrevious: pagination.hasPrevious, hasNext: pagination.hasNext,  users: userList});
       });
-      return res.status(helpers.error.errorStatus.OK).send({ users: userList});
     });
   },
 

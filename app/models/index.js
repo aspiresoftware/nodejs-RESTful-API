@@ -2,6 +2,7 @@
  * Register models here
  */
 var orm      = require('orm');
+var paging = require("orm-paging");
 var settings = require('../../config/settings');
 
 var connection = null;
@@ -20,6 +21,7 @@ module.exports = function (cb) {
     if (err) return cb(err);
 
     db.settings.set('instance.returnAllErrors', true);
+    db.use(paging);
     setup(db, cb);
   });
 };
