@@ -10,6 +10,7 @@ var connection = null;
 function setup(db, cb) {
   require('./user')(orm, db);
   require('./login')(orm, db);
+  require('./role')(orm, db);
 
   return cb(null, db);
 }

@@ -8,7 +8,7 @@ module.exports = {
     userRandom.id = user.id;
     userRandom.random = random;
     var accessToken = jwt.sign(userRandom, 'superSecret', {
-      expiresIn: 60
+      expiresIn: '1h'
     });
     user.accessToken = accessToken;
     var refreshToken = crypto.randomBytes(40).toString('hex');
@@ -27,5 +27,14 @@ module.exports = {
   },
   setPageSize: function (model) {
     model.settings.set("pagination.perpage", 3);
+  },
+  passwordGenrator: function () {
+    var keylist="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789",
+      pass='',
+      plength = 8;
+    for (i=0;i<plength;i++) {
+      pass += keylist.charAt(Math.floor(Math.random()*keylist.length));
+    }
+    return pass;
   }
 };

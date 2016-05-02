@@ -2,8 +2,7 @@
  * Utility for error messages and status
  */
 module.exports = {
-  errorStatus: {
-      OK: 200,
+  status: {
       Created: 201,
       NoContent: 204,
       BadRequest: 400,
@@ -18,7 +17,7 @@ module.exports = {
       ServiceUnavailable: 503,
       GatewayTimeout: 504
   },
-  errorMessages: {
+  message: {
       OK: 'The request was successful, and results may be obtained in the response body',
       Created: 'The POST request was successful, and results may be obtained in the response body.',
       NoContent: 'The request was successful, but the response body is empty as nothing deemed important should be returned.',
@@ -34,10 +33,23 @@ module.exports = {
       ServiceUnavailable: 'The service is temporarily unavailable. Please try again later.',
       GatewayTimeout: 'The request was unable to be processed in time. This may be due to server load. Please try again later.',
       usernameNotFound: "Please check your username !",
+      emailNotFound: "Please check your email !",
       invalidPassword: "Password is invalid",
       invalidToken: "Check your token details. Not matched with any user !",
       grantTypeNotFound: 'Not found valid grantType !',
-      authorizationNotFound: 'No Authorization header is provided'
+      authorizationNotFound: 'No Authorization header is provided',
+      userExist: "Usename already exist !",
+      wrongOldPassword: "Check you old password !"
+  },
+  sendError: function(err, res, next) {
+    //if(Array.isArray(err)) {
+      //return res.status(errorStatus.InternalServerError).send({ errors: formatErrors(err) });
+   // } else {
+      //if (next) {
+      //return next(err);
+      //}
+    //}
+    return {error: 'Issue found!'};
   },
   formatErrors: function(errorsIn) {
     var errors = {};

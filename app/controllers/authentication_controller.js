@@ -6,7 +6,6 @@
 var _       = require('lodash');
 var orm     = require('orm');
 var helpers = require('../utility');
-var log = require('../../config/logger.js');
 
 module.exports = {
   // Authenticate user
@@ -25,21 +24,16 @@ module.exports = {
         loginCredentials.username = buf.toString().split(':')[0];
         loginCredentials.password = buf.toString().split(':')[1];
 
-        log.info("crendentials = " + loginCredentials.username + ' ' + loginCredentials.password);
         req.models.user.find({
           username: loginCredentials.username,
           isActivate: true,
           isDeleted: false
         }, function(err, userList) {
           if(err) {
-            if(Array.isArray(err)) {
-              return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
-            } else {
-              return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: err });
-            }
+            return helpers.error.sendError(err, res, next);
           }
           if(userList && Array.isArray(userList) && userList.length <= 0){
-            return res.status(helpers.error.errorStatus.Unauthorized).send({ errors: helpers.error.errorMessages.usernameNotFound });
+            return res.status(helpers.error.status.Unauthorized).send({ error: helpers.error.message.usernameNotFound });
           } else if (userList && Array.isArray(userList) && userList.length > 0) {
             if (userList[0].password === loginCredentials.password) {
               // if user is found and password is right
@@ -48,24 +42,26 @@ module.exports = {
               params.accessToken = user.accessToken;
               params.refreshToken = user.refreshToken;
               params.user_id = user.id;
-              params.ipAddress = req.connection.remoteAddress;
-              params.userAgent = req.headers['user-agent'];
-
-              req.models.authToken.create(params, function (err, loggedUser) {
+              req.models.role.get(user.role_id, function(err, role) {
                 if(err) {
-                  if(Array.isArray(err)) {
-                    return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
-                  } else {
-                    return next(err);
-                  }
+                  return helpers.error.sendError(err, res, next);
                 }
-                return res.status(helpers.error.errorStatus.OK).send(loggedUser.serialize());
+                params.rolename = role.rolename;
+                params.ipAddress = req.connection.remoteAddress;
+                params.userAgent = req.headers['user-agent'];
+
+                req.models.authToken.create(params, function (err, loggedUser) {
+                  if(err) {
+                    return helpers.error.sendError(err, res, next);
+                  }
+                  return res.status(helpers.success.status.OK).send({user: userList[0].serialize() ,auth: loggedUser.serialize()});
+                });
               });
             } else {
-              return res.status(helpers.error.errorStatus.Unauthorized).send({ error: helpers.error.errorMessages.invalidPassword });
+              return res.status(helpers.error.status.Unauthorized).send({ error: helpers.error.message.invalidPassword });
             }
           } else {
-            return res.status(helpers.error.errorStatus.Unauthorized).send({ errors: helpers.error.errorMessages.usernameNotFound });
+            return res.status(helpers.error.status.Unauthorized).send({ error: helpers.error.message.usernameNotFound });
           }     
         });
       } else if(params.grantType == 'accessToken') {
@@ -73,45 +69,76 @@ module.exports = {
         // adn then generate new access token
         req.models.authToken.find({refreshToken: athorizationToken}, function(err, userList) {
           if(err) {
-            if(Array.isArray(err)) {
-              return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
-            } else {
-              return next(err);
-            }
+            return helpers.error.sendError(err, res, next);
           }
-          if(userList && Array.isArray(userList) && userList.length > 0){
+          if (userList && Array.isArray(userList) && userList.length > 0) {
             var user = userList[0];
             // generate new access token
             user = helpers.util.createAuthToken(user);
             // save newly generated access and refresh token
             req.models.authToken.get(user.id, function (err, currUser) {
               currUser.save(user, function (err) {
-                log.info("User "+ currUser.id +" updated with new tokens!");
-                return res.status(helpers.error.errorStatus.OK).send(user.serialize());
+                return res.status(helpers.success.status.OK).send(user.serialize());
               });
             });
-          } else{
-            return res.status(helpers.error.errorStatus.Unauthorized).send({ error: helpers.error.errorMessages.invalidToken });
+          } else {
+            return res.status(helpers.error.status.Unauthorized).send({ error: helpers.error.message.invalidToken });
           }
         });
       } else {
-        return res.status(helpers.error.errorStatus.Unauthorized).send({ error: helpers.error.errorMessages.grantTypeNotFound });
+        return res.status(helpers.error.status.Unauthorized).send({ error: helpers.error.message.grantTypeNotFound });
       }
     } else {
-      return res.status(helpers.error.errorStatus.Unauthorized).send({ error: helpers.error.errorMessages.authorizationNotFound });
+      return res.status(helpers.error.status.Unauthorized).send({ error: helpers.error.message.authorizationNotFound });
     }
   },
+
   // change password
+  changePassword :  function(req, res, next) {
+    var id = parseInt(req.params.id);
+    var params = req.body;
+    req.models.user.get(id, function (err, user) {
+      if(err) {
+         return helpers.error.sendError(err, res, next);
+      }
+      if (param.oldpass === user.password) {
+        user.save({password: param.newpass}, function (err) {
+          if(err) {
+             return helpers.error.sendError(err, res, next);
+          }
+          req.models.authToken.find({user_id:user.id}).remove(function (err) {
+            if(err) {
+              return helpers.error.sendError(err, res, next);
+            }
+            return res.status(helpers.success.status.OK).send({message: helpers.success.message.changePassword});
+          });       
+        });
+      } else {
+        return res.status(helpers.success.status.OK).send({ error: helpers.error.message.wrongOldPassword });
+      }
+    });
+  },
+
+  // forgot password
   forgotPassword: function(req, res, next) {
     var params = req.body;
-    req.models.login.find({username: params.username}).each(function(user) {
-      user.password = params.password;
-      req.models.login.get(user.id, function(err, currUser) {
-        currUser.save(user, function(err) {
-          log.info("password changed");
-          return res.status(helpers.error.errorStatus.OK).send(user.serialize());
+    req.models.user.find({ email: params.email }, function (err, user) {
+      if(err) {
+         return helpers.error.sendError(err, res, next);
+      }
+      if(user.length != 1) {
+        return res.status(helpers.success.status.OK).send({ error: helpers.error.message.emailNotFound });
+      } else {
+        var newpass = helpers.util.passwordGenrator();
+        // save user
+        user[0].save({password: newpass}, function (err) {
+          if(err) {
+           return helpers.error.sendError(err, res, next);
+          }
+          helpers.mail.sendUpdatedPassword(user.email, user.firstname + ' ' + user.lastname, newpass);
+          return res.status(helpers.success.status.OK).send({message: helpers.success.message.passwordUpdated});
         });
-      });
+      }
     });
   },
   // logout
@@ -119,9 +146,9 @@ module.exports = {
     var athorizationToken = req.headers.authorization.split(" ")[1];
     req.models.authToken.find({ accessToken: athorizationToken }).remove(function(err){
       if(err) {
-        return res.status(helpers.error.errorStatus.InternalServerError).send({error: 'Error while logging out'});
+        return helpers.error.sendError(err, res, next);
       }
-      return res.status(helpers.error.errorStatus.OK).send({ message: 'Successfully logged out'});
+      return res.status(helpers.success.status.OK).send({ message: helpers.success.message.loggedOut});
     });
   }
 };

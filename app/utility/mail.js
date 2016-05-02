@@ -12,21 +12,12 @@ var smtpTransport = nodemailer.createTransport(sendmailTransport({
   path: '/usr/lib/sendmail'
 }));
 module.exports = {
-  sendMail : function (req, res) {
+  sendUpdatedPassword : function (email, customername, newpassword) {
     var mailOptions = {
-      to : req.body.to,
-      subject : req.body.subject,
-      html : '<a href="' + req.body.url + '">Forgot Password</a>'
+      to : email,
+      subject : "Password reset successfully",
+      html : '<div>Hi' + customername + ',</div><div>Your new password is <b>' + newpassword + '.</b></div><div>Thanks,<br/>Helpme Team</div>'
     };
-    console.log(mailOptions);
-    smtpTransport.sendMail(mailOptions, function(error, response) {
-      if(error) {
-        console.log(error);
-        return res.status(403).send({ 'mail': 'error'});
-      } else {
-        console.log("Message sent: " + response.message);
-        return res.status(200).send({ 'mail': 'sent'});
-      }
-    });
+    smtpTransport.sendMail(mailOptions);
   }
 };

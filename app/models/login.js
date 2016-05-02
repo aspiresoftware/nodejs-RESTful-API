@@ -9,6 +9,7 @@ module.exports = function (orm, db) {
     refreshToken : {type: 'text'},
     ipAddress    : {type: 'text'},
     userAgent    : {type: 'text'},
+    rolename     : {type: 'text'},
     createdAt    : { type: 'date', time: true },
     updatedAt    : { type: 'date', time: true }
   },
@@ -30,8 +31,9 @@ module.exports = function (orm, db) {
           refreshToken : this.refreshToken,
           ipAddress    : this.ipAddress,
           userAgent    : this.userAgent,
+          rolename     : this.rolename,
           createdAt    : moment(this.createdAt).fromNow(),
-          updatedAt    : moment(this.updatedAt).fromNow(),
+          updatedAt    : moment(this.updatedAt).fromNow()
         };
       }
     }

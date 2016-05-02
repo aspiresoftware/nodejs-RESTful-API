@@ -6,7 +6,6 @@
 var _       = require('lodash');
 var orm     = require('orm');
 var helpers = require('../utility');
-var log = require('../../config/logger.js');
 
 module.exports = {
   // get list of all users
@@ -15,38 +14,47 @@ module.exports = {
     req.models.user.pages(function (err, totalPages) {
       var pagination = helpers.util.pagination(req, totalPages);
       req.models.user.page(pagination.currentPage).run(function (err, users) {
-
         if(err) {
-          if(Array.isArray(err)) {
-            return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
-          } else {
-            return next(err);
-          }
+           return helpers.error.sendError(err, res, next);
         }
-
         // Serialize user into json
         var userList = users.map(function (currentUser) {
           return currentUser.serialize();
         });                                         
-        return res.status(helpers.error.errorStatus.OK).send({ pages: totalPages, currentPage: pagination.currentPage, hasPrevious: pagination.hasPrevious, hasNext: pagination.hasNext,  users: userList});
+        return res.status(helpers.success.status.OK).send({ pages: totalPages, currentPage: pagination.currentPage, hasPrevious: pagination.hasPrevious, hasNext: pagination.hasNext,  users: userList});
       });
+    });
+  },
+
+  // Get user details
+  get: function (req, res, next) {
+    var id = parseInt(req.params.id);
+    req.models.user.get(id, function (err, user) {
+      if(err) {
+        return helpers.error.sendError(err, res, next);
+      }                                  
+      return res.status(helpers.success.status.OK).send(user.serialize());
     });
   },
 
   // Save new user
   create: function (req, res, next) {
     var params = req.body;
-
-    // save user
-    req.models.user.create(params, function (err, user) {
+    req.models.user.count({ username: params.username }, function (err, count) {
       if(err) {
-        if(Array.isArray(err)) {
-          return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
-        } else {
-          return next(err);
-        }
+         return helpers.error.sendError(err, res, next);
       }
-      return res.status(helpers.error.errorStatus.OK).send(user.serialize());
+      if(count > 0) {
+        return res.status(helpers.success.status.OK).send({ error: helpers.error.message.userExist });
+      } else {
+        // save user
+        req.models.user.create(params, function (err, user) {
+          if(err) {
+             return helpers.error.sendError(err, res, next);
+          }
+          return res.status(helpers.success.status.OK).send(user.serialize());
+        });
+      }
     });
   },
 
@@ -56,22 +64,13 @@ module.exports = {
     var params = req.body;
     req.models.user.get(id, function (err, user) {
       if(err) {
-        if(Array.isArray(err)) {
-          return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
-        } else {
-          return next(err);
-        }
+         return helpers.error.sendError(err, res, next);
       }
       user.save(params, function (err) {
         if(err) {
-          if(Array.isArray(err)) {
-            return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
-          } else {
-            return next(err);
-          }
+           return helpers.error.sendError(err, res, next);
         }
-        console.log("saved!" + user);
-        return res.status(helpers.error.errorStatus.OK).send(user.serialize());
+        return res.status(helpers.success.status.OK).send(user.serialize());
       });
     });
   },
@@ -84,22 +83,13 @@ module.exports = {
     };
     req.models.user.get(id, function (err, user) {
       if(err) {
-        if(Array.isArray(err)) {
-          return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
-        } else {
-          return next(err);
-        }
+         return helpers.error.sendError(err, res, next);
       }
       user.save(params, function (err) {
         if(err) {
-          if(Array.isArray(err)) {
-            return res.status(helpers.error.errorStatus.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
-          } else {
-            return next(err);
-          }
+           return helpers.error.sendError(err, res, next);
         }
-        console.log("removed!");
-        return res.status(helpers.error.errorStatus.OK).send(user.serialize());
+        return res.status(helpers.success.status.OK).send(user.serialize());
       });
     });
   }
