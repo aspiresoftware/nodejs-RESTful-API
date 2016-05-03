@@ -20,7 +20,7 @@ module.exports = {
         // Serialize user into json
         var userList = users.map(function (currentUser) {
           return currentUser.serialize();
-        });                                         
+        });
         return res.status(helpers.success.status.OK).send({ pages: totalPages, currentPage: pagination.currentPage, hasPrevious: pagination.hasPrevious, hasNext: pagination.hasNext,  users: userList});
       });
     });
@@ -32,7 +32,7 @@ module.exports = {
     req.models.user.get(id, function (err, user) {
       if(err) {
         return helpers.error.sendError(err, res, next);
-      }                                  
+      }
       return res.status(helpers.success.status.OK).send(user.serialize());
     });
   },
@@ -47,12 +47,35 @@ module.exports = {
       if(count > 0) {
         return res.status(helpers.success.status.OK).send({ error: helpers.error.message.userExist });
       } else {
-        // save user
-        req.models.user.create(params, function (err, user) {
+        // get user role
+        req.models.role.find( {rolename: params.rolename}, function (err, role) {
           if(err) {
-             return helpers.error.sendError(err, res, next);
+            if(Array.isArray(err)) {
+              return res.status(helpers.error.status.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
+            } else {
+              if (next) {
+                return next(err);
+              }
+            }
           }
-          return res.status(helpers.success.status.OK).send(user.serialize());
+          role = role[0];
+          params.role_id = role.id;
+          console.log(params);
+          // save user
+          req.models.user.create(params, function (err, user) {
+            console.log(user + err);
+            if(err) {
+              if(Array.isArray(err)) {
+                return res.status(helpers.error.status.InternalServerError).send({ errors: helpers.error.formatErrors(err) });
+              } else {
+                if (next) {
+                  return next(err);
+                }
+              }
+              // return helpers.error.sendError(err, res, next);
+            }
+            return res.status(helpers.success.status.OK).send(user.serialize());
+          });
         });
       }
     });
@@ -66,6 +89,8 @@ module.exports = {
       if(err) {
          return helpers.error.sendError(err, res, next);
       }
+      console.log(params);
+      console.log(user);
       user.save(params, function (err) {
         if(err) {
            return helpers.error.sendError(err, res, next);

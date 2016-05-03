@@ -39,16 +39,18 @@ module.exports = {
       grantTypeNotFound: 'Not found valid grantType !',
       authorizationNotFound: 'No Authorization header is provided',
       userExist: "Usename already exist !",
-      wrongOldPassword: "Check you old password !"
+      wrongOldPassword: "Check you old password !",
+      NoHeaderFound: 'No header is provided'
   },
   sendError: function(err, res, next) {
-    //if(Array.isArray(err)) {
-      //return res.status(errorStatus.InternalServerError).send({ errors: formatErrors(err) });
-   // } else {
-      //if (next) {
-      //return next(err);
-      //}
-    //}
+    /*if(Array.isArray(err)) {
+      console.log(status);
+      return res.status(status.InternalServerError).send({ errors: formatErrors(err) });
+    } else {
+      if (next) {
+        return next(err);
+      }
+    }*/
     return {error: 'Issue found!'};
   },
   formatErrors: function(errorsIn) {

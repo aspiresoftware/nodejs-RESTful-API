@@ -62,7 +62,7 @@ module.exports = {
             }
           } else {
             return res.status(helpers.error.status.Unauthorized).send({ error: helpers.error.message.usernameNotFound });
-          }     
+          }
         });
       } else if(params.grantType == 'accessToken') {
         // if no, then it will verify refresh token
@@ -96,13 +96,15 @@ module.exports = {
   // change password
   changePassword :  function(req, res, next) {
     var id = parseInt(req.params.id);
+    console.log('id is'+id);
     var params = req.body;
     req.models.user.get(id, function (err, user) {
       if(err) {
          return helpers.error.sendError(err, res, next);
       }
-      if (param.oldpass === user.password) {
-        user.save({password: param.newpass}, function (err) {
+      if (params.oldpassword === user.password) {
+        console.log('password match');
+        user.save({password: params.newpassword}, function (err) {
           if(err) {
              return helpers.error.sendError(err, res, next);
           }
@@ -111,7 +113,7 @@ module.exports = {
               return helpers.error.sendError(err, res, next);
             }
             return res.status(helpers.success.status.OK).send({message: helpers.success.message.changePassword});
-          });       
+          });
         });
       } else {
         return res.status(helpers.success.status.OK).send({ error: helpers.error.message.wrongOldPassword });
@@ -127,16 +129,16 @@ module.exports = {
          return helpers.error.sendError(err, res, next);
       }
       if(user.length != 1) {
-        return res.status(helpers.success.status.OK).send({ error: helpers.error.message.emailNotFound });
+        return res.status(helpers.error.status.NotFound).send({ error: helpers.error.message.emailNotFound });
       } else {
         var newpass = helpers.util.passwordGenrator();
         // save user
-        user[0].save({password: newpass}, function (err) {
+        user[0].save({password: newpass}, function (err, user) {
           if(err) {
            return helpers.error.sendError(err, res, next);
           }
-          helpers.mail.sendUpdatedPassword(user.email, user.firstname + ' ' + user.lastname, newpass);
-          return res.status(helpers.success.status.OK).send({message: helpers.success.message.passwordUpdated});
+          helpers.mail.sendUpdatedPassword(user.email, user.firstname + ' ' + user.lastname, newpass, res);
+          /*return res.status(helpers.success.status.OK).send({message: helpers.success.message.passwordUpdated});*/
         });
       }
     });

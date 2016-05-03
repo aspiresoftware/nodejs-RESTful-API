@@ -31,29 +31,33 @@ module.exports = function (app) {
   function autheticationMiddleware(req, res, next) {
     // check header or url parameters or post parameters for token
     var header = req.headers.authorization;
-    var prefix = header.split(' ')[0];
-    var token = header.split(' ')[1];
+    if (header) {
+      var prefix = header.split(' ')[0];
+      var token = header.split(' ')[1];
 
-    // check for autheticated user
-    // route middleware to verify a token
-    if (prefix == 'Bearer') {
-      // decode token
-      if (token) {
-        // verifies secret and checks exp
-        jwt.verify(token, 'superSecret', function(err, decoded) {
-          if (err) {
-            return res.status(helpers.error.status.AuthenticationTimeout).send({error: helpers.error.message.AuthenticationTimeout});
-          } else {
-            // if everything is good, save to request for use in other routes
-            req.decoded = decoded;
-            next();
-          }
-        });
-      } else {
-        // if there is no token
-        // return an error
-        return res.status(helpers.error.status.Forbidden).send({error: helpers.error.message.Forbidden});
+      // check for autheticated user
+      // route middleware to verify a token
+      if (prefix == 'Bearer') {
+        // decode token
+        if (token) {
+          // verifies secret and checks exp
+          jwt.verify(token, 'superSecret', function(err, decoded) {
+            if (err) {
+              return res.status(helpers.error.status.AuthenticationTimeout).send({error: helpers.error.message.AuthenticationTimeout});
+            } else {
+              // if everything is good, save to request for use in other routes
+              req.decoded = decoded;
+              next();
+            }
+          });
+        } else {
+          // if there is no token
+          // return an error
+          return res.status(helpers.error.status.Forbidden).send({error: helpers.error.message.Forbidden});
+        }
       }
+    } else {
+      return res.status(helpers.error.status.Forbidden).send({error: helpers.error.message.NoHeaderFound});
     }
   }
 

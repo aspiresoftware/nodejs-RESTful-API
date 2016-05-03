@@ -5,7 +5,7 @@ var moment = require('moment');
 
 module.exports = function (orm, db) {
   var Role = db.define('role', {
-    rolename    : { type: 'text', required: true },
+    rolename     : { type: 'text', required: true },
     isActivate   : { type: 'boolean'},
     isDeleted    : { type: 'boolean'},
     createdAt    : { type: 'date', time: true },

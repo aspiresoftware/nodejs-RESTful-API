@@ -31,6 +31,14 @@ module.exports = function (orm, db) {
     },
     methods: {
       serialize: function () {
+        var token;
+
+        if (this.token) {
+          token = this.token.map(function (t) { return t.serialize(); });
+        } else {
+          token = [];
+        }
+
         return {
           id           : this.id,
           firstname    : this.firstname,
@@ -43,7 +51,8 @@ module.exports = function (orm, db) {
           isActivate   : this.isActivate,
           isDeleted    : this.isDeleted,
           createdAt    : moment(this.createdAt).fromNow(),
-          updatedAt    : moment(this.updatedAt).fromNow()
+          updatedAt    : moment(this.updatedAt).fromNow(),
+          token        : token
         };
       }
     }
