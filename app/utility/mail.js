@@ -17,7 +17,7 @@ var smtpTransport = nodemailer.createTransport(sendmailTransport({
 }));
 
 module.exports = {
-  sendUpdatedPassword : function (email, customername, newpassword, res) {
+  sendUpdatedPassword : function (email, customername, newpassword, success, failure) {
     var mailOptions = {
       to : email,
       subject : "Password reset successfully",
@@ -25,9 +25,9 @@ module.exports = {
     };
     smtpTransport.sendMail(mailOptions, function(error, response) {
       if(error) {
-        return res.status(403).send({ 'mail': 'error'});
+        failure();
       } else {
-        return res.status(success.status.OK).send({message: success.message.passwordUpdated});
+        success();
       }
     });
   }

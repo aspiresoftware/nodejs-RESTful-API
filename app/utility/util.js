@@ -8,7 +8,7 @@ module.exports = {
     userRandom.id = user.id;
     userRandom.random = random;
     var accessToken = jwt.sign(userRandom, 'superSecret', {
-      expiresIn: '1h'
+      expiresIn: 5
     });
     user.accessToken = accessToken;
     var refreshToken = crypto.randomBytes(40).toString('hex');

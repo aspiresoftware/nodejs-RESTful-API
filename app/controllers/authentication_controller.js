@@ -137,8 +137,13 @@ module.exports = {
           if(err) {
            return helpers.error.sendError(err, res, next);
           }
-          helpers.mail.sendUpdatedPassword(user.email, user.firstname + ' ' + user.lastname, newpass, res);
-          /*return res.status(helpers.success.status.OK).send({message: helpers.success.message.passwordUpdated});*/
+          helpers.mail.sendUpdatedPassword(user.email, user.firstname + ' ' + user.lastname, newpass, success, failure);
+          function success() {
+            return res.status(success.status.OK).send({message: success.message.passwordUpdated});
+          }
+          function failure() {
+            return res.status(403).send({ 'mail': 'error'});
+          }
         });
       }
     });

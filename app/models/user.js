@@ -39,6 +39,22 @@ module.exports = function (orm, db) {
           token = [];
         }
 
+        /*var role;
+
+        if (this.role) {
+          if (Array.isArray(this.role)) {
+            role = this.role.map(function (t) { return t.serialize(); });
+          } else {
+            role = this.role;
+          }
+        } else {
+          role = [];
+        }
+
+        role = this.getRole(this.role_id, function(role) {
+          console.log(role);
+        });*/
+
         return {
           id           : this.id,
           firstname    : this.firstname,
